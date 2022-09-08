@@ -44,7 +44,7 @@ spec:
     stage('login to GHCR') {
       steps {
         container('buildah') {
-          sh 'echo $GITHUB_TOKEN_PSW | buildah login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin'
+          sh 'echo $GITHUB_TOKEN_PSW | buildah login -u $GITHUB_TOKEN_USR --password-stdin ghcr.io'
         }
       }
     }

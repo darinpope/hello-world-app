@@ -23,6 +23,11 @@ spec:
 '''   
     }
   }
+  environment {
+    GITHUB_TOKEN=credentials('github-pat-darinpope-userpass')
+    IMAGE_NAME='darinpope/hello-world-app'
+    IMAGE_VERSION='0.0.1'
+  }
   options {
     buildDiscarder(logRotator(numToKeepStr: '10'))
     durabilityHint('PERFORMANCE_OPTIMIZED')
@@ -32,15 +37,30 @@ spec:
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t hello-world-app:0.0.1 .'
+          sh 'buildah build -t $IMAGE_NAME:$IMAGE_VERSION .'
         }
+      }
+    }
+    stage('login to GHCR') {
+      steps {
+        sh 'echo $GITHUB_TOKEN_PSW | buildah login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin'
+      }
+    }
+    stage('tag image') {
+      steps {
+        sh 'buildah tag $IMAGE_NAME:$IMAGE_VERSION ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+      }
+    }
+    stage('push image') {
+      steps {
+        sh 'buildah push ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
       }
     }
   }
   post {
     always {
       container('buildah') {
-        sh 'buildah logout'
+        sh 'buildah logout ghcr.io'
       }
     }
   }  

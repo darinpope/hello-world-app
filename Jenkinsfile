@@ -43,17 +43,23 @@ spec:
     }
     stage('login to GHCR') {
       steps {
-        sh 'echo $GITHUB_TOKEN_PSW | buildah login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin'
+        container('buildah') {
+          sh 'echo $GITHUB_TOKEN_PSW | buildah login ghcr.io -u $GITHUB_TOKEN_USR --password-stdin'
+        }
       }
     }
     stage('tag image') {
       steps {
-        sh 'buildah tag $IMAGE_NAME:$IMAGE_VERSION ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+        container('buildah') {
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_VERSION ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+        }
       }
     }
     stage('push image') {
       steps {
-        sh 'buildah push ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+        container('buildah') {
+          sh 'buildah push ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+        }
       }
     }
   }

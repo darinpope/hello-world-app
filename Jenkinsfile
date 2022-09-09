@@ -56,19 +56,19 @@ spec:
         }
       }
     }
-    stage('push image') {
-      steps {
-        container('buildah') {
-          sh 'buildah push $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-        }
-      }
-    }
     stage('manifest') {
       steps {
         container('buildah') {
           sh 'buildah manifest create $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
           sh 'buildah manifest add $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$IMAGE_NAME:$IMAGE_TAG'
           sh 'buildah manifest push --all $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+        }
+      }
+    }
+    stage('push image') {
+      steps {
+        container('buildah') {
+          sh 'buildah push $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }

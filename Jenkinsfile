@@ -46,7 +46,7 @@ spec:
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG --manifest $MANIFEST_NAME .'
+          sh 'buildah build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG --manifest $MANIFEST_NAME --arch amd64 .'
         }
       }
     }
@@ -61,13 +61,6 @@ spec:
       steps {
         container('buildah') {
           sh 'buildah manifest push --all $MANIFEST_NAME docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-        }
-      }
-    }
-    stage('push image') {
-      steps {
-        container('buildah') {
-          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }

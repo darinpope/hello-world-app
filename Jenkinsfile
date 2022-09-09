@@ -36,17 +36,17 @@ spec:
     disableConcurrentBuilds()
   }
   stages {
-    stage('create manifest') {
-      steps {
-        container('buildah') {
-          sh 'buildah manifest create $MANIFEST_NAME'
-        }
-      }
-    }
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG --manifest $MANIFEST_NAME --arch amd64 .'
+          sh 'buildah build -t $IMAGE_NAME:$IMAGE_TAG --manifest $MANIFEST_NAME --arch amd64 .'
+        }
+      }
+    }
+    stage('tag image') {
+      steps {
+        container('buildah') {
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }
@@ -57,10 +57,19 @@ spec:
         }
       }
     }
-    stage('push manifest') {
+    stage('push to registry') {
       steps {
         container('buildah') {
-          sh 'buildah manifest push --all $MANIFEST_NAME docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+        }
+      }
+    }
+    stage('create manifest') {
+      steps {
+        container('buildah') {
+          sh 'buildah manifest create $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah manifest add $REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$REGISTRY/$IMAGE_NAME:amd64'
+          sh 'buildah manifest push --all $REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }

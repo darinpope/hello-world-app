@@ -24,7 +24,7 @@ spec:
     }
   }
   environment {
-    GITHUB_TOKEN=credentials('github-pat-darinpope-userpass')
+    DOCKERHUB_CREDS=credentials('dockerhub-darinpope-userpass')
     IMAGE_NAME='darinpope/hello-world-app'
     IMAGE_VERSION='0.0.1'
   }
@@ -41,24 +41,24 @@ spec:
         }
       }
     }
-    stage('login to GHCR') {
+    stage('login to DockerHub') {
       steps {
         container('buildah') {
-          sh 'echo $GITHUB_TOKEN_PSW | buildah login -u $GITHUB_TOKEN_USR --password-stdin ghcr.io'
+          sh 'echo $DOCKERHUB_CREDS_PSW | buildah login -u $DOCKERHUB_CREDS_USR --password-stdin docker.io'
         }
       }
     }
     stage('tag image') {
       steps {
         container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:$IMAGE_VERSION ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_VERSION docker.io/$IMAGE_NAME:$IMAGE_VERSION'
         }
       }
     }
     stage('push image') {
       steps {
         container('buildah') {
-          sh 'buildah push ghcr.io/$IMAGE_NAME:$IMAGE_VERSION'
+          sh 'buildah push docker.io/$IMAGE_NAME:$IMAGE_VERSION'
         }
       }
     }
@@ -66,7 +66,7 @@ spec:
   post {
     always {
       container('buildah') {
-        sh 'buildah logout ghcr.io'
+        sh 'buildah logout docker.io'
       }
     }
   }  

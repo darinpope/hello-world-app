@@ -50,17 +50,17 @@ spec:
         }
       }
     }
-    stage('push manifest') {
-      steps {
-        container('buildah') {
-          sh 'buildah manifest push --all $MANIFEST_NAME docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-        }
-      }
-    }
     stage('login to DockerHub') {
       steps {
         container('buildah') {
           sh 'echo $DOCKERHUB_CREDS_PSW | buildah login -u $DOCKERHUB_CREDS_USR --password-stdin $REGISTRY'
+        }
+      }
+    }
+    stage('push manifest') {
+      steps {
+        container('buildah') {
+          sh 'buildah manifest push --all $MANIFEST_NAME docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }

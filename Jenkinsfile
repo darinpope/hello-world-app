@@ -25,9 +25,10 @@ spec:
   }
   environment {
     DOCKERHUB_CREDS=credentials('dockerhub-darinpope-userpass')
-    IMAGE_REGISTRY='docker.io'
+    REGISTRY='docker.io'
     IMAGE_NAME='darinpope/hello-world-app'
     IMAGE_TAG='0.0.1'
+    MANIFEST_NAME='hello-world-app'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -35,40 +36,38 @@ spec:
     disableConcurrentBuilds()
   }
   stages {
+    stage('create manifest') {
+      steps {
+        container('buildah') {
+          sh 'buildah manifest create $MANIFEST_NAME'
+        }
+      }
+    }
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t $IMAGE_NAME:$IMAGE_TAG .'
+          sh 'buildah build -t $REGISTRY/$IMAGE_NAME:$IMAGE_TAG --manifest $MANIFEST_NAME .'
+        }
+      }
+    }
+    stage('push manifest') {
+      steps {
+        container('buildah') {
+          sh 'buildah manifest push --all $MANIFEST_NAME docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }
     stage('login to DockerHub') {
       steps {
         container('buildah') {
-          sh 'echo $DOCKERHUB_CREDS_PSW | buildah login -u $DOCKERHUB_CREDS_USR --password-stdin $IMAGE_REGISTRY'
-        }
-      }
-    }
-    stage('tag image') {
-      steps {
-        container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-        }
-      }
-    }
-    stage('manifest') {
-      steps {
-        container('buildah') {
-          sh 'buildah manifest create $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-          sh 'buildah manifest add $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$IMAGE_NAME:$IMAGE_TAG'
-          sh 'buildah manifest push --all $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'echo $DOCKERHUB_CREDS_PSW | buildah login -u $DOCKERHUB_CREDS_USR --password-stdin $REGISTRY'
         }
       }
     }
     stage('push image') {
       steps {
         container('buildah') {
-          sh 'buildah push $IMAGE_REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }
@@ -76,7 +75,7 @@ spec:
   post {
     always {
       container('buildah') {
-        sh 'buildah logout $IMAGE_REGISTRY'
+        sh 'buildah logout $REGISTRY'
       }
     }
   }  

@@ -38,14 +38,14 @@ spec:
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t $IMAGE_NAME:IMAGE_TAG  .'
+          sh 'buildah build -t $IMAGE_NAME:$IMAGE_TAG .'
         }
       }
     }
     stage('tag image') {
       steps {
         container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:IMAGE_TAG $REGISTRY/$IMAGE_NAME:IMAGE_TAG'
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }
@@ -59,7 +59,7 @@ spec:
     stage('push to registry') {
       steps {
         container('buildah') {
-          sh 'buildah push $REGISTRY/$IMAGE_NAME:IMAGE_TAG'
+          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
         }
       }
     }

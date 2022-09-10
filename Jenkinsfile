@@ -27,8 +27,7 @@ spec:
     DOCKERHUB_CREDS=credentials('dockerhub-darinpope-userpass')
     REGISTRY='docker.io'
     IMAGE_NAME='darinpope/hello-world-app'
-    IMAGE_TAG='latest'
-    IMAGE_ARCH='amd64'
+    IMAGE_TAG='0.0.1'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -39,14 +38,14 @@ spec:
     stage('Build') {
       steps {
         container('buildah') {
-          sh 'buildah build -t $IMAGE_NAME:$IMAGE_ARCH --arch $IMAGE_ARCH .'
+          sh 'buildah build -t $IMAGE_NAME:IMAGE_TAG  .'
         }
       }
     }
     stage('tag image') {
       steps {
         container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:$IMAGE_ARCH $REGISTRY/$IMAGE_NAME:$IMAGE_ARCH'
+          sh 'buildah tag $IMAGE_NAME:IMAGE_TAG $REGISTRY/$IMAGE_NAME:IMAGE_TAG'
         }
       }
     }
@@ -60,16 +59,7 @@ spec:
     stage('push to registry') {
       steps {
         container('buildah') {
-          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_ARCH'
-        }
-      }
-    }
-    stage('create manifest') {
-      steps {
-        container('buildah') {
-          sh 'buildah manifest create $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
-          sh 'buildah manifest add $REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$REGISTRY/$IMAGE_NAME:$IMAGE_ARCH'
-          sh 'buildah manifest push --all $REGISTRY/$IMAGE_NAME:$IMAGE_TAG docker://$REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah push $REGISTRY/$IMAGE_NAME:IMAGE_TAG'
         }
       }
     }

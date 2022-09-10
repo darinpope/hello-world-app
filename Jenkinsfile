@@ -61,7 +61,7 @@ spec:
     stage('push to registry') {
       steps {
         container('buildah') {
-          sh 'buildah push $REGISTRY/$APP_NAME/$PROCESS_TYPE'
+          sh 'buildah push --format=v2s2 $REGISTRY/$APP_NAME/$PROCESS_TYPE'
         }
       }
     }

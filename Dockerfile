@@ -10,4 +10,4 @@ RUN ./mvnw package
 
 FROM docker.io/eclipse-temurin:17.0.4.1_1-jre-alpine
 COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar /app/
-ENTRYPOINT ["java","-jar","/app/demo-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-Dserver.port=${PORT}","-jar","/app/demo-0.0.1-SNAPSHOT.jar"]

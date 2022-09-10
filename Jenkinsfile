@@ -24,10 +24,12 @@ spec:
     }
   }
   environment {
-    DOCKERHUB_CREDS=credentials('dockerhub-darinpope-userpass')
-    REGISTRY='docker.io'
+    HEROKU_API_KEY = credentials('heroku-api-key')
+    REGISTRY='registry.heroku.com'
     IMAGE_NAME='darinpope/hello-world-app'
     IMAGE_TAG='0.0.1'
+    APP_NAME='hello-world-environment-stage'
+    PROCESS_TYPE='web'
   }
   options {
     buildDiscarder(logRotator(numToKeepStr: '10'))
@@ -45,21 +47,21 @@ spec:
     stage('tag image') {
       steps {
         container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$APP_NAME/$PROCESS_TYPE'
         }
       }
     }
-    stage('login to DockerHub') {
+    stage('login to Heroku Registry') {
       steps {
         container('buildah') {
-          sh 'echo $DOCKERHUB_CREDS_PSW | buildah login -u $DOCKERHUB_CREDS_USR --password-stdin $REGISTRY'
+          sh 'echo $HEROKU_API_KEY | buildah login --username=_ --password-stdin $REGISTRY'
         }
       }
     }
     stage('push to registry') {
       steps {
         container('buildah') {
-          sh 'buildah push $REGISTRY/$IMAGE_NAME:$IMAGE_TAG'
+          sh 'buildah push $REGISTRY/$APP_NAME/$PROCESS_TYPE'
         }
       }
     }

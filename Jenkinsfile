@@ -28,7 +28,8 @@ spec:
     REGISTRY='registry.heroku.com'
     IMAGE_NAME='darinpope/hello-world-app'
     IMAGE_TAG='0.0.1'
-    APP_NAME='hello-world-environment-stage'
+    STAGE_APP_NAME='hello-world-environment-stage'
+    PROD_APP_NAME='hello-world-environment-prod'
     PROCESS_TYPE='web'
   }
   options {
@@ -44,10 +45,11 @@ spec:
         }
       }
     }
-    stage('tag image') {
+    stage('tag image for both registries') {
       steps {
         container('buildah') {
-          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$APP_NAME/$PROCESS_TYPE'
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$STAGE_APP_NAME/$PROCESS_TYPE'
+          sh 'buildah tag $IMAGE_NAME:$IMAGE_TAG $REGISTRY/$PROD_APP_NAME/$PROCESS_TYPE'
         }
       }
     }
@@ -58,10 +60,17 @@ spec:
         }
       }
     }
-    stage('push to registry') {
+    stage('push to stage registry') {
       steps {
         container('buildah') {
-          sh 'buildah push --format=v2s2 $REGISTRY/$APP_NAME/$PROCESS_TYPE'
+          sh 'buildah push --format=v2s2 $REGISTRY/$STAGE_APP_NAME/$PROCESS_TYPE'
+        }
+      }
+    }
+    stage('push to prod registry') {
+      steps {
+        container('buildah') {
+          sh 'buildah push --format=v2s2 $REGISTRY/$PROD_APP_NAME/$PROCESS_TYPE'
         }
       }
     }

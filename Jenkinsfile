@@ -8,6 +8,11 @@ metadata:
   name: buildah
 spec:
   containers:
+  - name: maven
+    image: maven:3.8.6-eclipse-temurin-17
+    command:
+    - cat
+    tty: true
   - name: buildah
     image: quay.io/buildah/stable:v1.27.0
     command:
@@ -38,6 +43,16 @@ spec:
     disableConcurrentBuilds()
   }
   stages {
+    stage('Run Tests') {
+      steps {
+        container('maven') {
+          sh '''
+            mvn --version
+            mvn clean test
+          '''
+        }
+      }
+    }
     stage('Build') {
       steps {
         container('buildah') {

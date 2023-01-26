@@ -1,0 +1,10 @@
+pipeline {
+  agent any
+  stages {
+    stage('do source files have a license?') {
+      steps {
+        sh 'addlicense -check src/**/*.java'
+      }
+    }
+  }
+}

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2023 This Is a Fake Company, Inc.
+ *
+ * This is our custom license.
+ */
+
 package com.planetpope.demo;
 
 import org.springframework.boot.SpringApplication;
